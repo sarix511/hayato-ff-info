@@ -6,42 +6,59 @@ import SearchForm from "@/components/SearchForm";
 import PlayerCard from "@/components/PlayerCard";
 import { useToast } from "@/hooks/use-toast";
 
+interface PetInfo {
+  petId?: number;
+  level?: number;
+  exp?: number;
+  isSelected?: boolean;
+  skinId?: number;
+  selectedSkillId?: number;
+}
+
+interface BasicInfo {
+  accountId?: string;
+  nickname?: string;
+  region?: string;
+  level?: number;
+  exp?: number;
+  bannerId?: number;
+  headPic?: number;
+  rank?: number;
+  rankingPoints?: number;
+  badgeCnt?: number;
+  liked?: number;
+  createAt?: string;
+  lastLoginAt?: string;
+  csRankingPoints?: number;
+  csRank?: number;
+  title?: number;
+  releaseVersion?: string;
+  maxRank?: number;
+  csMaxRank?: number;
+}
+
+interface ClanInfo {
+  clanId?: string;
+  clanName?: string;
+  clanLevel?: number;
+  captainId?: string;
+  currentMembers?: number;
+  maxMembers?: number;
+}
+
+interface SocialInfo {
+  accountId?: string;
+  language?: number;
+  privacy?: string;
+  socialHighlight?: string;
+}
+
 interface PlayerData {
-  basicInfo?: {
-    accountId?: string;
-    nickname?: string;
-    region?: string;
-    level?: number;
-    exp?: number;
-    bannerId?: string;
-    headPic?: string;
-    rank?: number;
-    rankingPoints?: number;
-    badgeCnt?: number;
-    liked?: number;
-    showBrlessBadge?: boolean;
-    createAt?: string;
-    lastLoginAt?: string;
-    csRankingPoints?: number;
-    csRank?: number;
-    csHead?: string;
-    petInfo?: {
-      id?: number;
-      name?: string;
-      level?: number;
-      exp?: number;
-      isSelected?: boolean;
-    };
-    title?: number;
-    badges?: number[];
-    releaseVersion?: string;
-  };
-  socialInfo?: {
-    bio?: string;
-    clanId?: string;
-    clanName?: string;
-    clanLevel?: number;
-  };
+  basicInfo?: BasicInfo;
+  petInfo?: PetInfo;
+  clanBasicInfo?: ClanInfo;
+  socialInfo?: SocialInfo;
+  Supported_Regions?: string[];
 }
 
 const Index = () => {
@@ -67,7 +84,7 @@ const Index = () => {
       const data = await response.json();
 
       if (data.error || !data.basicInfo) {
-        throw new Error(data.message || "Player not found");
+        throw new Error(data.message || "Player not found. Make sure the UID and region are correct.");
       }
 
       setPlayerData(data);

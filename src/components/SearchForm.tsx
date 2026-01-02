@@ -18,17 +18,8 @@ interface SearchFormProps {
 
 const regions = [
   { value: "IND", label: "India" },
-  { value: "BR", label: "Brazil" },
-  { value: "SG", label: "Singapore" },
-  { value: "RU", label: "Russia" },
-  { value: "ID", label: "Indonesia" },
-  { value: "TW", label: "Taiwan" },
-  { value: "US", label: "United States" },
-  { value: "VN", label: "Vietnam" },
-  { value: "TH", label: "Thailand" },
-  { value: "ME", label: "Middle East" },
-  { value: "PK", label: "Pakistan" },
   { value: "BD", label: "Bangladesh" },
+  { value: "PK", label: "Pakistan" },
 ];
 
 const SearchForm = ({ onSearch, isLoading }: SearchFormProps) => {
