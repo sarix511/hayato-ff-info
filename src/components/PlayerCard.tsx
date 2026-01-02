@@ -1,42 +1,58 @@
 import { motion } from "framer-motion";
-import { User, Trophy, Sword, Target, Crown, Zap, Shield, Star } from "lucide-react";
+import { User, Trophy, Sword, Target, Crown, Zap, Shield, Star, Users } from "lucide-react";
+
+interface PetInfo {
+  petId?: number;
+  level?: number;
+  exp?: number;
+  isSelected?: boolean;
+  skinId?: number;
+  selectedSkillId?: number;
+}
+
+interface BasicInfo {
+  accountId?: string;
+  nickname?: string;
+  region?: string;
+  level?: number;
+  exp?: number;
+  bannerId?: number;
+  headPic?: number;
+  rank?: number;
+  rankingPoints?: number;
+  badgeCnt?: number;
+  liked?: number;
+  createAt?: string;
+  lastLoginAt?: string;
+  csRankingPoints?: number;
+  csRank?: number;
+  title?: number;
+  releaseVersion?: string;
+  maxRank?: number;
+  csMaxRank?: number;
+}
+
+interface ClanInfo {
+  clanId?: string;
+  clanName?: string;
+  clanLevel?: number;
+  captainId?: string;
+  currentMembers?: number;
+  maxMembers?: number;
+}
+
+interface SocialInfo {
+  accountId?: string;
+  language?: number;
+  privacy?: string;
+  socialHighlight?: string;
+}
 
 interface PlayerData {
-  basicInfo?: {
-    accountId?: string;
-    nickname?: string;
-    region?: string;
-    level?: number;
-    exp?: number;
-    bannerId?: string;
-    headPic?: string;
-    rank?: number;
-    rankingPoints?: number;
-    badgeCnt?: number;
-    liked?: number;
-    showBrlessBadge?: boolean;
-    createAt?: string;
-    lastLoginAt?: string;
-    csRankingPoints?: number;
-    csRank?: number;
-    csHead?: string;
-    petInfo?: {
-      id?: number;
-      name?: string;
-      level?: number;
-      exp?: number;
-      isSelected?: boolean;
-    };
-    title?: number;
-    badges?: number[];
-    releaseVersion?: string;
-  };
-  socialInfo?: {
-    bio?: string;
-    clanId?: string;
-    clanName?: string;
-    clanLevel?: number;
-  };
+  basicInfo?: BasicInfo;
+  petInfo?: PetInfo;
+  clanBasicInfo?: ClanInfo;
+  socialInfo?: SocialInfo;
 }
 
 interface PlayerCardProps {
@@ -72,7 +88,14 @@ const StatItem = ({ icon: Icon, label, value, color = "primary" }: {
 };
 
 const PlayerCard = ({ data }: PlayerCardProps) => {
-  const { basicInfo, socialInfo } = data;
+  const { basicInfo, petInfo, clanBasicInfo, socialInfo } = data;
+
+  // Format the bio/signature - remove color codes for cleaner display
+  const formatBio = (text?: string) => {
+    if (!text) return null;
+    // Remove color codes like [FFFFFF], [00E5FF], etc. and formatting tags
+    return text.replace(/\[([A-Fa-f0-9]{6})\]/g, '').replace(/\[B\]|\[C\]|\[I\]/g, '').trim();
+  };
 
   return (
     <motion.div
@@ -104,8 +127,10 @@ const PlayerCard = ({ data }: PlayerCardProps) => {
                       alt="Avatar"
                       className="w-full h-full object-cover"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = 'none';
-                        (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const sibling = target.nextElementSibling as HTMLElement;
+                        if (sibling) sibling.classList.remove('hidden');
                       }}
                     />
                   ) : null}
@@ -140,9 +165,9 @@ const PlayerCard = ({ data }: PlayerCardProps) => {
                 )}
               </div>
 
-              {socialInfo?.bio && (
+              {socialInfo?.socialHighlight && (
                 <p className="mt-3 text-muted-foreground text-sm italic line-clamp-2">
-                  "{socialInfo.bio}"
+                  "{formatBio(socialInfo.socialHighlight)}"
                 </p>
               )}
             </div>
@@ -159,35 +184,41 @@ const PlayerCard = ({ data }: PlayerCardProps) => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <StatItem icon={Trophy} label="BR Rank Points" value={basicInfo?.rankingPoints} color="primary" />
             <StatItem icon={Crown} label="CS Rank Points" value={basicInfo?.csRankingPoints} color="secondary" />
-            <StatItem icon={Star} label="Likes" value={basicInfo?.liked} color="ice" />
+            <StatItem icon={Star} label="Likes" value={basicInfo?.liked?.toLocaleString()} color="ice" />
             <StatItem icon={Shield} label="Badges" value={basicInfo?.badgeCnt} color="primary" />
           </div>
 
           {/* Guild Info */}
-          {socialInfo?.clanName && (
+          {clanBasicInfo?.clanName && (
             <motion.div 
               className="mt-4 p-4 rounded-xl bg-gradient-to-r from-secondary/10 to-primary/10 border border-secondary/30"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4 }}
             >
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-secondary/20">
-                  <Sword className="w-5 h-5 text-secondary" />
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-secondary/20">
+                    <Sword className="w-5 h-5 text-secondary" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider">Guild</p>
+                    <p className="text-lg font-semibold text-foreground">
+                      {clanBasicInfo.clanName} 
+                      <span className="ml-2 text-sm text-secondary">(Lv. {clanBasicInfo.clanLevel})</span>
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Guild</p>
-                  <p className="text-lg font-semibold text-foreground">
-                    {socialInfo.clanName} 
-                    <span className="ml-2 text-sm text-secondary">(Lv. {socialInfo.clanLevel})</span>
-                  </p>
+                <div className="flex items-center gap-1 text-muted-foreground">
+                  <Users className="w-4 h-4" />
+                  <span className="text-sm">{clanBasicInfo.currentMembers}/{clanBasicInfo.maxMembers}</span>
                 </div>
               </div>
             </motion.div>
           )}
 
           {/* Pet Info */}
-          {basicInfo?.petInfo?.name && (
+          {petInfo?.petId && (
             <motion.div 
               className="mt-4 p-4 rounded-xl bg-gradient-to-r from-primary/10 to-ice/10 border border-primary/30"
               initial={{ opacity: 0 }}
@@ -201,8 +232,8 @@ const PlayerCard = ({ data }: PlayerCardProps) => {
                 <div>
                   <p className="text-xs text-muted-foreground uppercase tracking-wider">Pet</p>
                   <p className="text-lg font-semibold text-foreground">
-                    {basicInfo.petInfo.name} 
-                    <span className="ml-2 text-sm text-primary">(Lv. {basicInfo.petInfo.level})</span>
+                    Pet ID: {petInfo.petId}
+                    <span className="ml-2 text-sm text-primary">(Lv. {petInfo.level})</span>
                   </p>
                 </div>
               </div>
