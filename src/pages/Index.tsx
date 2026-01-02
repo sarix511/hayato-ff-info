@@ -5,6 +5,7 @@ import Logo from "@/components/Logo";
 import SearchForm from "@/components/SearchForm";
 import PlayerCard from "@/components/PlayerCard";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface PetInfo {
   petId?: number;
@@ -73,18 +74,16 @@ const Index = () => {
     setPlayerData(null);
 
     try {
-      const response = await fetch(
-        `https://hayato-info-api.vercel.app/info?uid=${uid}&region=${region}`
-      );
+      const { data, error } = await supabase.functions.invoke('player-info', {
+        body: { uid, region }
+      });
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch player data");
+      if (error) {
+        throw new Error(error.message || "Failed to fetch player data");
       }
 
-      const data = await response.json();
-
       if (data.error || !data.basicInfo) {
-        throw new Error(data.message || "Player not found. Make sure the UID and region are correct.");
+        throw new Error(data.message || data.error || "Player not found. Make sure the UID and region are correct.");
       }
 
       setPlayerData(data);
